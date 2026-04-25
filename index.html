@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo Mã hóa/Giải mã</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fff8dc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;   
+      justify-content: space-between; 
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      position: relative;
+    }
+
+    .box {
+      width: 100%;
+      max-width: 600px;
+      border: 2px solid red;
+      background-color: #fffacd;
+      padding: 30px;
+      margin: 20px 0;
+      text-align: center;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 24px;
+      font-size: 78px;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 600px;
+      margin-top: auto; 
+    }
+
+    button {
+      flex: 1;
+      margin: 0 10px;
+      padding: 36px;
+      font-size: 48px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
+      transition: opacity 0.3s ease, filter 0.3s ease, color 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    button:hover {
+      opacity: 0.85;
+    }
+
+    /* Hiệu ứng invert khi focus */
+    button:focus {
+      filter: invert(100%);
+      color: black; /* chữ đổi sang màu ngược */
+      outline: none;
+    }
+
+    .encrypt-btn {
+      background-color: #28a745; /* xanh */
+    }
+
+    .decrypt-btn {
+      background-color: #dc3545; /* đỏ */
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 20px 30px;
+      border-radius: 6px;
+      color: white;
+      font-size: 24px;
+      display: none;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+  <!-- Ô nhập liệu -->
+  <div class="box">
+    <input id="encryptInput" type="number" maxlength="3" placeholder="Nhập 3 số">
+  </div>
+
+  <!-- Ô kết quả ngay dưới ô nhập -->
+  <div class="box">
+    <input id="decryptOutput" type="number" maxlength="3" readonly placeholder="Kết quả">
+  </div>
+
+  <!-- Nút bấm ở cuối màn hình -->
+  <div class="buttons">
+    <button class="encrypt-btn" onclick="encrypt()">Mã hóa</button>
+    <button class="decrypt-btn" onclick="decrypt()">Giải mã</button>
+  </div>
+
+  <div id="notification" class="notification"></div>
+
+  <script>
+    const encryptInput = document.getElementById('encryptInput');
+    const decryptOutput = document.getElementById('decryptOutput');
+
+    encryptInput.addEventListener('input', () => {
+      decryptOutput.value = "";
+    });
+
+    encryptInput.addEventListener('focus', () => {
+      encryptInput.value = "";
+      decryptOutput.value = "";
+    });
+
+    function showNotification(message, color) {
+      const notif = document.getElementById('notification');
+      let countdown = 3;
+      notif.textContent = `${message} (${countdown})`;
+      notif.style.backgroundColor = color;
+      notif.style.display = 'block';
+
+      const interval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          notif.textContent = `${message} (${countdown})`;
+        } else {
+          clearInterval(interval);
+          notif.style.display = 'none';
+        }
+      }, 1000);
+    }
+
+    // Mã hóa a theo logic mới
+    function encodeA(a) {
+      for (let n = a; n < 100; n += 10) {
+        if (n % 3 === 0) {
+          return n / 3;
+        }
+      }
+      return 0;
+    }
+
+    // Giải mã a theo logic mới
+    function decodeA(encA) {
+      const n = encA * 3;
+      return n % 10;
+    }
+
+    // Logic mã hóa
+    function encrypt() {
+      const input = encryptInput.value;
+      if (/^\d{3}$/.test(input)) {
+        const a = parseInt(input[0]);
+        const b = parseInt(input[1]);
+        const c = parseInt(input[2]);
+
+        const encA = encodeA(a);
+        const encB = (b + 1) % 10;
+        const encC = (c * 7) % 10;
+
+        decryptOutput.value = `${encA}${encB}${encC}`;
+        showNotification("Đã mã hóa thành công", "#28a745");
+      } else {
+        alert("Vui lòng nhập đúng 3 chữ số!");
+      }
+    }
+
+    // Logic giải mã
+    function decrypt() {
+      const input = encryptInput.value;
+      if (/^\d{3}$/.test(input)) {
+        const encA = parseInt(input[0]);
+        const encB = parseInt(input[1]);
+        const encC = parseInt(input[2]);
+
+        const a = decodeA(encA);
+        const b = (encB - 1 + 10) % 10;
+
+        let c = null;
+        for (let i = 0; i < 10; i++) {
+          if ((i * 7) % 10 === encC) {
+            c = i;
+            break;
+          }
+        }
+
+        decryptOutput.value = `${a}${b}${c}`;
+        showNotification("Đã giải mã thành công", "#dc3545");
+      } else {
+        alert("Vui lòng nhập đúng 3 chữ số để giải mã!");
+      }
+    }
+  </script>
+</body>
+</html>
